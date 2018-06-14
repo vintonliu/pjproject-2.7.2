@@ -1,0 +1,11 @@
+
+.vs/pjproject-vs14/v14/.suo
+*output/
+*.obj
+*.*db
+*.lib
+*.bsc
+*.ilk
+*.log
+UpgradeLog.htm
+*.exe

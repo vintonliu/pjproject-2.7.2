@@ -1,5 +1,5 @@
 /* $Id: main.c 4752 2014-02-19 08:57:22Z ming $ */
-/* 
+/*
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
  *
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "pjsua_app.h"
 
@@ -29,17 +29,17 @@ static pjsua_app_cfg_t	    cfg;
 /* Called when CLI (re)started */
 void on_app_started(pj_status_t status, const char *msg)
 {
-    pj_perror(3, THIS_FILE, status, (msg)?msg:"");
+  pj_perror(3, THIS_FILE, status, (msg) ? msg : "");
 }
 
 void on_app_stopped(pj_bool_t restart, int argc, char** argv)
 {
-    if (argv) {
-	cfg.argc = argc;
-	cfg.argv = argv;
-    }
+  if (argv) {
+    cfg.argc = argc;
+    cfg.argv = argv;
+  }
 
-    running = restart;
+  running = restart;
 }
 
 #if defined(PJ_WIN32) && PJ_WIN32!=0
@@ -48,27 +48,27 @@ void on_app_stopped(pj_bool_t restart, int argc, char** argv)
 static pj_thread_desc handler_desc;
 
 static BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
-{   
-    switch (fdwCtrlType) 
-    { 
-        // Handle the CTRL+C signal. 
- 
-        case CTRL_C_EVENT: 
-        case CTRL_CLOSE_EVENT: 
-        case CTRL_BREAK_EVENT: 
-        case CTRL_LOGOFF_EVENT: 
-        case CTRL_SHUTDOWN_EVENT: 
-	    pj_thread_register("ctrlhandler", handler_desc, &sig_thread);
-	    PJ_LOG(3,(THIS_FILE, "Ctrl-C detected, quitting.."));
-	    receive_end_sig = PJ_TRUE;
-            pjsua_app_destroy();	    
-	    ExitProcess(1);
-            PJ_UNREACHED(return TRUE;)
- 
-        default: 
- 
-            return FALSE; 
-    } 
+{
+  switch (fdwCtrlType)
+  {
+    // Handle the CTRL+C signal. 
+
+  case CTRL_C_EVENT:
+  case CTRL_CLOSE_EVENT:
+  case CTRL_BREAK_EVENT:
+  case CTRL_LOGOFF_EVENT:
+  case CTRL_SHUTDOWN_EVENT:
+    pj_thread_register("ctrlhandler", handler_desc, &sig_thread);
+    PJ_LOG(3, (THIS_FILE, "Ctrl-C detected, quitting.."));
+    receive_end_sig = PJ_TRUE;
+    pjsua_app_destroy();
+    ExitProcess(1);
+    PJ_UNREACHED(return TRUE;)
+
+  default:
+
+    return FALSE;
+  }
 }
 
 static void setup_socket_signal()
@@ -77,7 +77,7 @@ static void setup_socket_signal()
 
 static void setup_signal_handler(void)
 {
-    SetConsoleCtrlHandler(&CtrlHandler, TRUE);
+  SetConsoleCtrlHandler(&CtrlHandler, TRUE);
 }
 
 #else
@@ -85,7 +85,7 @@ static void setup_signal_handler(void)
 
 static void setup_socket_signal()
 {
-    signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, SIG_IGN);
 }
 
 static void setup_signal_handler(void) {}
@@ -93,38 +93,40 @@ static void setup_signal_handler(void) {}
 
 int main_func(int argc, char *argv[])
 {
-    pj_status_t status = PJ_TRUE;
+  pj_status_t status = PJ_TRUE;
 
-    pj_bzero(&cfg, sizeof(cfg));
-    cfg.on_started = &on_app_started;
-    cfg.on_stopped = &on_app_stopped;
-    cfg.argc = argc;
-    cfg.argv = argv;
+  pj_bzero(&cfg, sizeof(cfg));
+  cfg.on_started = &on_app_started;
+  cfg.on_stopped = &on_app_stopped;
+  cfg.argc = argc;
+  cfg.argv = argv;
 
-    setup_signal_handler();
-    setup_socket_signal();
+  setup_signal_handler();
+  setup_socket_signal();
 
-    while (running) {        
-	status = pjsua_app_init(&cfg);
-	if (status == PJ_SUCCESS) {
-	    status = pjsua_app_run(PJ_TRUE);
-	} else {
-	    running = PJ_FALSE;
-	}
-
-	if (!receive_end_sig) {
-	    pjsua_app_destroy();
-
-	    /* This is on purpose */
-	    pjsua_app_destroy();
-	} else {
-	    pj_thread_join(sig_thread);
-	}
+  while (running) {
+    status = pjsua_app_init(&cfg);
+    if (status == PJ_SUCCESS) {
+      status = pjsua_app_run(PJ_TRUE);
     }
-    return 0;
+    else {
+      running = PJ_FALSE;
+    }
+
+    if (!receive_end_sig) {
+      pjsua_app_destroy();
+
+      /* This is on purpose */
+      pjsua_app_destroy();
+    }
+    else {
+      pj_thread_join(sig_thread);
+    }
+  }
+  return 0;
 }
 
 int main(int argc, char *argv[])
 {
-    return pj_run_app(&main_func, argc, argv, 0);
+  return pj_run_app(&main_func, argc, argv, 0);
 }
